@@ -7,9 +7,6 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# build
-yarn.lock
-
 node_modules
 dist
 dist-ssr
@@ -25,3 +22,28 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+*storybook.log
+
+# === Yarn Berry ===
+.pnp.*
+.yarn/cache/*
+.yarn/unplugged/*
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# Keep these parts of .yarn/ (important for reproducibility)
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# === Storybook ===
+# Keep .storybook/ (do NOT ignore)
+# Ignore Storybook build output (default folder is 'storybook-static')
+storybook-static/
+
+# === Node ===
+node_modules/
+
