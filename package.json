@@ -13,9 +13,13 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
     "@tailwindcss/vite": "^4.1.5",
+    "lucide-react": "^0.507.0",
+    "motion": "^12.9.7",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "zustand": "^5.0.4"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "3",
@@ -27,6 +31,7 @@
     "@storybook/react": "8.6.12",
     "@storybook/react-vite": "8.6.12",
     "@storybook/test": "8.6.12",
+    "@tailwindcss/postcss": "^4.1.5",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react-swc": "^3.9.0",

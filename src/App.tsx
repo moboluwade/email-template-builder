@@ -1,35 +1,51 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+"use client";
+import "./App.css";
+import Editor from "./components/editor/Editor";
+import Palette from "./components/palette/Palette";
+import ActionPane from "./components/actionPane/ActionPane";
+
+import {
+  DndContext,
+  type DragEndEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+
+import { useTemplateStore, type BlockType } from "@/stores/useTemplateStore";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const { addBlock } = useTemplateStore();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 8px of movement required before activation
+      },
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    // If dropped over the editor
+    if (over && over.id === "editor-droppable") {
+      const blockType = active.data.current?.type as BlockType;
+      if (blockType) {
+        addBlock(blockType);
+      }
+    }
+  };
 
   return (
-    <>
-      <div className='bg-red-500'>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+      <div className="flex flex-row justify-between h-screen max-w-screen min-w-screen bg-background">
+        <Palette />
+        <Editor />
+        <ActionPane />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </DndContext>
+  );
 }
 
-export default App
+export default App;
