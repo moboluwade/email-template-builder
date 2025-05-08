@@ -8,7 +8,7 @@ const HtmlMode = ({ htmlCode }: { htmlCode: string }) => {
   return (
     <>
       {mode === "html" && (
-        <div className="w-full h-full p-4 mx-auto text-black bg-white shadow-sm">
+        <div className="w-full h-full p-4 mx-auto overflow-x-hidden overflow-y-hidden text-black bg-black shadow-sm max-w-[600px]">
           <SyntaxHighlighter
             language="htmlbars"
             style={a11yDark}
