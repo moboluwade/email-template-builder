@@ -75,7 +75,7 @@ export default function Palette({ buildingBlocks }: PaletteProps) {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-3 gap-2">
         {filteredBlocks.map((block) => (
           <DraggableBlock key={block.type} block={block} />
         ))}
