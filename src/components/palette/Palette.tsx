@@ -62,7 +62,7 @@ export default function Palette({ buildingBlocks }: PaletteProps) {
   return (
     <div className="flex flex-col w-64 h-screen p-4 overflow-y-auto bg-[#0f0f14] text-white border-r border-gray-200">
       <h2 className="mb-4 text-2xl font-semibold text-center text-white">
-        Palette
+       🎨 Palette
       </h2>
 
       <div className="mb-4">
@@ -83,7 +83,7 @@ export default function Palette({ buildingBlocks }: PaletteProps) {
 
       <div className="pt-4 mt-auto border-t border-gray-200">
         <div className="text-xs text-gray-500">
-          Drag and drop blocks onto the canvas to build your email template.
+         🫡 Drag and drop blocks onto the canvas to build your email template.
         </div>
       </div>
     </div>

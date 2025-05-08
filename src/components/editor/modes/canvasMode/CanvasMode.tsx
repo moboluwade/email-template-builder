@@ -10,9 +10,18 @@ import {
   useDroppable,
 } from "@dnd-kit/core";
 import { GripVertical } from "lucide-react";
+import { BuildingBlock } from "@/lib/buildingBlocks";
 
 // for sortable block component
-function SortableBlock({ block, index }: { block: any; index: number }) {
+function SortableBlock({
+  block,
+  index,
+  isPaletteItemActive,
+}: {
+  block: any;
+  index: number;
+  isPaletteItemActive: boolean;
+}) {
   const { selectBlock, selectedBlockId } = useTemplateStore();
   const {
     attributes,
@@ -21,6 +30,7 @@ function SortableBlock({ block, index }: { block: any; index: number }) {
     transform,
     transition,
     isDragging,
+    over,
   } = useSortable({
     id: block.id,
     data: {
@@ -28,6 +38,9 @@ function SortableBlock({ block, index }: { block: any; index: number }) {
       block,
     },
   });
+
+  const isOver = over?.id === block.id;
+  const showTopIndicator = isOver && isPaletteItemActive;
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -41,13 +54,16 @@ function SortableBlock({ block, index }: { block: any; index: number }) {
     <div
       ref={setNodeRef}
       style={style}
-      className={`mb-4 group ${
+      className={`mb-4 group relative${
         selectedBlockId === block.id
           ? "ring-2 ring-[#0f0f14] rounded-xs"
           : "hover:ring-2 hover:ring-gray-200"
       }`}
       onClick={() => selectBlock(block.id)}
     >
+      {showTopIndicator && (
+        <div className="absolute top-0 left-0 right-0 h-1 -translate-y-1 rounded-full bg-primary" />
+      )}
       <div className="relative">
         <div
           className="absolute top-0 bottom-0 left-0 flex items-center justify-center w-8 transition-opacity opacity-0 group-hover:opacity-100 cursor-grab"
@@ -64,7 +80,10 @@ function SortableBlock({ block, index }: { block: any; index: number }) {
   );
 }
 
-const CanvasMode = () => {
+interface CanvasModeProps {
+  isPaletteItemActive: boolean;
+}
+const CanvasMode = ({ isPaletteItemActive }: CanvasModeProps) => {
   const { blocks, mode } = useTemplateStore();
 
   const { setNodeRef, isOver } = useDroppable({
@@ -77,7 +96,9 @@ const CanvasMode = () => {
         <div
           ref={setNodeRef}
           className={`shadow-sm min-h-full mx-auto rounded-lg bg-white p-4 ${
-            isOver ? "ring-2 ring-primary ring-opacity-50 bg-gray-50" : ""
+            isOver && isPaletteItemActive
+              ? "ring-2 ring-[#0f0f14] ring-opacity-50 bg-gray-50"
+              : ""
           }`}
         >
           {blocks.length === 0 ? (
@@ -88,8 +109,16 @@ const CanvasMode = () => {
           ) : (
             <div>
               {blocks.map((block, index) => (
-                <SortableBlock key={block.id} block={block} index={index} />
+                <SortableBlock
+                  key={block.id}
+                  block={block}
+                  index={index}
+                  isPaletteItemActive={isPaletteItemActive}
+                />
               ))}
+              {isOver && isPaletteItemActive && blocks.length > 0 && (
+                <div className="h-1 my-4 rounded-full bg-[#0f0f14]" />
+              )}
             </div>
           )}
         </div>

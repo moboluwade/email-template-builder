@@ -7,8 +7,13 @@ import PreviewMode from "./modes/previewMode/PreviewMode";
 import HtmlMode from "./modes/htmlMode/HtmlMode";
 import Navigator from "./Navigator";
 import { closestCenter, DndContext } from "@dnd-kit/core";
+import { BuildingBlock } from "@/lib/buildingBlocks";
 
-export default function Editor() {
+interface EditorProps{
+  isPaletteItemActive: boolean; 
+}
+
+export default function Editor({isPaletteItemActive}: EditorProps) {
   const { mode, setMode, getHtmlOutput } = useTemplateStore();
   const [htmlCode, setHtmlCode] = useState("");
 
@@ -19,7 +24,7 @@ export default function Editor() {
 
       {/* Editor Content */}
       <div className="flex-1 p-6 overflow-auto">
-        <CanvasMode />
+        <CanvasMode isPaletteItemActive={isPaletteItemActive}/>
 
         <PreviewMode />
 
