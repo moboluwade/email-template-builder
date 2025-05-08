@@ -6,6 +6,7 @@ import ActionPane from "./components/actionPane/ActionPane";
 import { buildingBlocks } from "./lib/buildingBlocks";
 
 import {
+  closestCenter,
   DndContext,
   DragCancelEvent,
   type DragEndEvent,
@@ -18,9 +19,13 @@ import {
 
 import { useTemplateStore, type BlockType } from "@/stores/useTemplateStore";
 import { useState } from "react";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 
 function App() {
-  const { addBlock } = useTemplateStore();
+  const { addBlock, blocks, moveBlock } = useTemplateStore();
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const sensors = useSensors(
@@ -37,11 +42,23 @@ function App() {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    // If dropped over the editor
-    if (over && over.id === "editor-droppable") {
+    // If dropped over the editor for a new block
+    if (over && over.id === "editor-droppable" && active.data.current?.type) {
       const blockType = active.data.current?.type as BlockType;
       if (blockType) {
         addBlock(blockType);
+      }
+      setActiveId(null);
+      return;
+    }
+
+    //Handle reordering of existing blocks on the canvas.
+    if (over && active.id != over.id) {
+      const activeIndex = blocks.findIndex((block) => block.id === active.id);
+      const overIndex = blocks.findIndex((block) => block.id === over.id);
+
+      if (activeIndex !== -1 && overIndex !== -1) {
+        moveBlock(blocks[activeIndex].id, overIndex);
       }
     }
   };
@@ -60,10 +77,16 @@ function App() {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
+      collisionDetection={closestCenter}
     >
       <div className="flex flex-row justify-between h-screen max-w-screen min-w-screen bg-background">
         <Palette buildingBlocks={buildingBlocks} />
-        <Editor />
+        <SortableContext
+          items={blocks.map((block) => block.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <Editor />
+        </SortableContext>
         <ActionPane />
       </div>
 

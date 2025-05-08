@@ -138,11 +138,13 @@ export const useTemplateStore = create<TemplateState>((set, get) => ({
       };
     }),
 
+  // Move a block to a new position
   moveBlock: (id, newPosition) =>
     set((state) => {
       const blockIndex = state.blocks.findIndex((block) => block.id === id);
       if (blockIndex === -1) return state;
 
+      // this shift array element positions, returning the new shifted array
       const newBlocks = [...state.blocks];
       const [movedBlock] = newBlocks.splice(blockIndex, 1);
       newBlocks.splice(newPosition, 0, movedBlock);
@@ -153,7 +155,10 @@ export const useTemplateStore = create<TemplateState>((set, get) => ({
         position: index,
       }));
 
-      return { blocks: updatedBlocks };
+      return {
+        blocks: updatedBlocks, // returns updated block
+        selectedBlockId: id, // keeps the moved block selected
+      };
     }),
 
   selectBlock: (id) => set({ selectedBlockId: id }),

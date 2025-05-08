@@ -65,26 +65,14 @@ function SortableBlock({ block, index }: { block: any; index: number }) {
 }
 
 const CanvasMode = () => {
-  const { blocks, mode, addBlock, selectBlock, selectedBlockId } =
-    useTemplateStore();
+  const { blocks, mode } = useTemplateStore();
 
   const { setNodeRef, isOver } = useDroppable({
     id: "editor-droppable",
   });
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { over, active } = event;
-
-    if (over?.id === "editor-droppable") {
-      const blockType = active?.data?.current?.type;
-      if (blockType) {
-        addBlock(blockType); // create a block of this type and add to store
-      }
-    }
-  };
-
   return (
-    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+    <>
       {mode === "canvas" && (
         <div
           ref={setNodeRef}
@@ -106,7 +94,7 @@ const CanvasMode = () => {
           )}
         </div>
       )}
-    </DndContext>
+    </>
   );
 };
 
