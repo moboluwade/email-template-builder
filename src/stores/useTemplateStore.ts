@@ -21,7 +21,7 @@ export interface Block {
 interface TemplateState {
   blocks: Block[];
   selectedBlockId: string | null;
-  mode: "editor" | "preview" | "html";
+  mode: "canvas" | "preview" | "html";
 
   // Actions
   addBlock: (type: BlockType, position?: number) => void;
@@ -29,7 +29,7 @@ interface TemplateState {
   removeBlock: (id: string) => void;
   moveBlock: (id: string, newPosition: number) => void;
   selectBlock: (id: string | null) => void;
-  setMode: (mode: "editor" | "preview" | "html") => void;
+  setMode: (mode: "canvas" | "preview" | "html") => void;
   getHtmlOutput: () => string;
 }
 
@@ -87,7 +87,7 @@ const getDefaultContent = (type: BlockType): Record<string, any> => {
 export const useTemplateStore = create<TemplateState>((set, get) => ({
   blocks: [],
   selectedBlockId: null,
-  mode: "editor",
+  mode: "canvas",
 
   addBlock: (type, position) =>
     set((state) => {
