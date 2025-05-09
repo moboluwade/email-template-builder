@@ -8,6 +8,13 @@ This is a **drag-and-drop email template builder** made for modern React apps. D
 Think of it as your no-fuss email playground — made with JavaScript, for JavaScript developers.  
 Plug it into your Next.js or React app, customize blocks, and skip the headache of email formatting.
 
+---
+## 🔗 Live Demo
+
+Check out the live version of the email template builder:
+
+👉 [https://mobs-emailer.netlify.app/](https://mobs-emailer.netlify.app/)
+
 
 ----------
 ## 📸 Demo Screenshot
