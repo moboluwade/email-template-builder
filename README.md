@@ -12,7 +12,7 @@ Plug it into your Next.js or React app, customize blocks, and skip the headache 
 ----------
 ## 📸 Demo Screenshot
 
-![Email Template Builder Screenshot](./890f8365-03ff-41fa-b279-861c2da68e6a.png)
+![Email Template Builder Screenshot](./image-demo.png)
 
 ---
 
