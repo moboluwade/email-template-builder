@@ -1,26 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { useTemplateStore } from "@/stores/useTemplateStore";
 import CanvasMode from "./modes/canvasMode/CanvasMode";
 import PreviewMode from "./modes/previewMode/PreviewMode";
 import HtmlMode from "./modes/htmlMode/HtmlMode";
-import Navigator from "./Navigator";
-import { closestCenter, DndContext } from "@dnd-kit/core";
-import { BuildingBlock } from "@/lib/buildingBlocks";
+import Navigator from "./navigator/Navigator";
 
 interface EditorProps{
   isPaletteItemActive: boolean; 
 }
 
 export default function Editor({isPaletteItemActive}: EditorProps) {
-  const { mode, setMode, getHtmlOutput } = useTemplateStore();
-  const [htmlCode, setHtmlCode] = useState("");
 
   return (
-    <div className="flex flex-col flex-1 h-screen">
+    <div className="flex flex-col flex-1 h-screen bg-[#322A2D]/30">
       {/* Editor Navigation */}
-      <Navigator setHtmlCode={setHtmlCode} />
+      <Navigator/>
 
       {/* Editor Content */}
       <div className="flex-1 p-6 overflow-auto">
@@ -28,7 +22,7 @@ export default function Editor({isPaletteItemActive}: EditorProps) {
 
         <PreviewMode />
 
-        <HtmlMode htmlCode={htmlCode} />
+        <HtmlMode />
       </div>
     </div>
   );
