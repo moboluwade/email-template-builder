@@ -4,50 +4,106 @@ interface BlockRendererProps {
   block: Block;
 }
 
+// Centralized styles for headers
+const HeaderStylesCSS = {
+  h1: {
+    fontSize: "2.25rem",
+    fontWeight: "bold",
+  },
+  h2: {
+    fontSize: "1.5rem",
+    fontWeight: "600",
+  },
+  h3: {
+    fontSize: "1.25rem",
+    fontWeight: "600",
+  },
+};
+
 export function BlockRenderer({ block }: BlockRendererProps) {
   switch (block.type) {
-    case "header":
+    case "header": {
+      const level = block.content.level;
       return (
-        <div
-          style={{
-            color: block.content.color,
-            textAlign: block.content.align as any,
-          }}
-        >
-          {block.content.level === "h1" && (
-            <h1 className="text-2xl font-bold">{block.content.text}</h1>
+        // Apply block.styles to the outermost wrapper
+        <div style={block.styles}>
+          {level === "h1" && (
+            <table
+              width="100%"
+              border={0}
+              cellPadding={0}
+              cellSpacing={0}
+              style={block.styles}
+            >
+              <tr>
+                <td>
+                  {/* content goes here */}
+                  <h1
+                    style={{
+                      ...HeaderStylesCSS.h1,
+                      color: block.content.color,
+                      textAlign: block.content.align as any,
+                    }}
+                  >
+                    {block.content.text}
+                  </h1>
+                </td>
+              </tr>
+            </table>
           )}
-          {block.content.level === "h2" && (
-            <h2 className="text-xl font-bold">{block.content.text}</h2>
+          {level === "h2" && (
+            <h2
+              style={{
+                ...HeaderStylesCSS.h2,
+                color: block.content.color,
+                textAlign: block.content.align as any,
+              }}
+            >
+              {block.content.text}
+            </h2>
           )}
-          {block.content.level === "h3" && (
-            <h3 className="text-lg font-bold">{block.content.text}</h3>
+          {level === "h3" && (
+            <h3
+              style={{
+                ...HeaderStylesCSS.h3,
+                color: block.content.color,
+                textAlign: block.content.align as any,
+              }}
+            >
+              {block.content.text}
+            </h3>
           )}
         </div>
       );
+    }
 
     case "paragraph":
       return (
-        <p
-          style={{
-            color: block.content.color,
-            textAlign: block.content.align as any,
-          }}
-        >
-          {block.content.text}
-        </p>
+        // ✅ Wrap in a div to apply block.styles
+        <div style={block.styles}>
+          <p
+            style={{
+              color: block.content.color,
+              textAlign: block.content.align as any,
+            }}
+          >
+            {block.content.text}
+          </p>
+        </div>
       );
 
     case "button":
       return (
-        <div style={{ textAlign: block.content.align as any }}>
-          <button
-            className="px-4 py-2 rounded-md"
-            style={{
-              backgroundColor: block.content.backgroundColor,
-              color: block.content.textColor,
-            }}
-          >
+        // ✅ Apply block.styles to outer wrapper and preserve alignment
+        <div
+          style={{
+            // ...block.styles,
+            textAlign: block.content.align as any,
+            padding: "0.25rem 2rem",
+            // block.styles.textAlign
+          }}
+        >
+          <button className="rounded-md" style={{ ...block.styles }}>
             {block.content.text}
           </button>
         </div>
@@ -55,7 +111,8 @@ export function BlockRenderer({ block }: BlockRendererProps) {
 
     case "image":
       return (
-        <div style={{ textAlign: block.content.align as any }}>
+        // ✅ Apply block.styles to outer wrapper and preserve alignment
+        <div style={{ ...block.styles, textAlign: block.content.align as any }}>
           {block.content.src ? (
             <img
               src={block.content.src || "/placeholder.svg"}
@@ -76,40 +133,66 @@ export function BlockRenderer({ block }: BlockRendererProps) {
 
     case "divider":
       return (
-        <hr
-          style={{
-            borderTop: `${block.content.thickness}px ${block.content.style} ${block.content.color}`,
-            margin: "1rem 0",
-          }}
-        />
+        // ✅ Apply block.styles if needed (optional here)
+        <div style={block.styles}>
+          <hr
+            style={{
+              borderTop: `${block.content.thickness}px ${block.content.style} ${block.content.color}`,
+              margin: "1rem 0",
+            }}
+          />
+        </div>
       );
 
     case "spacer":
-      return <div style={{ height: `${block.content.height}px` }}></div>;
+      return (
+        // ✅ Apply block.styles to allow custom padding/margin etc.
+        <div
+          style={{ height: `${block.content.height}px`, ...block.styles }}
+        ></div>
+      );
 
     case "list":
-      return block.content.type === "ordered" ? (
-        <ol className="pl-5 list-decimal">
-          {block.content.items.map((item: string, index: number) => (
-            <li key={index}>{item}</li>
-          ))}
-        </ol>
-      ) : (
-        <ul className="pl-5 list-disc">
-          {block.content.items.map((item: string, index: number) => (
-            <li key={index}>{item}</li>
-          ))}
-        </ul>
+      const ListTag = block.content.type === "ordered" ? "ol" : "ul";
+      const listClass =
+        block.content.type === "ordered" ? "list-decimal" : "list-disc";
+      return (
+        // ✅ Wrap list in a div for block.styles
+        <div style={block.styles}>
+          <ListTag className={`pl-5 ${listClass}`}>
+            {block.content.items.map((item: string, index: number) => (
+              <li key={index}>{item}</li>
+            ))}
+          </ListTag>
+        </div>
       );
 
     case "table":
       return (
-        <table className="w-full border-collapse">
+        <table
+          width="100%"
+          cellPadding={0}
+          cellSpacing={0}
+          border={0}
+          style={{
+            borderCollapse: "collapse",
+            width: "100%",
+            tableLayout: "fixed", // forces the table to distribute width evenly first then expand.
+            ...block.styles, // allows padding, margin etc.
+          }}
+        >
           <tbody>
             {block.content.data.map((row: string[], rowIndex: number) => (
               <tr key={rowIndex}>
                 {row.map((cell: string, cellIndex: number) => (
-                  <td key={cellIndex} className="p-2 border border-gray-300">
+                  <td
+                    key={cellIndex}
+                    style={{
+                      padding: "8px",
+                      border: "1px solid #ccc",
+                      textAlign: "left",
+                    }}
+                  >
                     {cell}
                   </td>
                 ))}
@@ -117,6 +200,25 @@ export function BlockRenderer({ block }: BlockRendererProps) {
             ))}
           </tbody>
         </table>
+      );
+
+      return (
+        // ✅ Wrap table in a div for block.styles
+        <div style={block.styles}>
+          <table className="w-full border-collapse">
+            <tbody>
+              {block.content.data.map((row: string[], rowIndex: number) => (
+                <tr key={rowIndex}>
+                  {row.map((cell: string, cellIndex: number) => (
+                    <td key={cellIndex} className="p-2 border border-gray-300">
+                      {cell}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       );
 
     default:

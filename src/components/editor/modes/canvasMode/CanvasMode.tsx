@@ -54,15 +54,15 @@ function SortableBlock({
     <div
       ref={setNodeRef}
       style={style}
-      className={`mb-4 group relative${
+      className={` group relative ${
         selectedBlockId === block.id
           ? "ring-2 ring-[#0f0f14] rounded-xs"
-          : "hover:ring-2 hover:ring-gray-200"
+          : "hover:ring-2 hover:ring-gray-200 rounded-xs"
       }`}
       onClick={() => selectBlock(block.id)}
     >
       {showTopIndicator && (
-        <div className="absolute top-0 left-0 right-0 h-1 -translate-y-1 rounded-full bg-primary" />
+        <div className="absolute top-0 left-0 right-0 h-1 -translate-y-1 rounded-full bg-[#0f0f14]" />
       )}
       <div className="relative">
         <div
@@ -72,9 +72,7 @@ function SortableBlock({
         >
           <GripVertical size={16} className="text-gray-400" />
         </div>
-        <div className="pl-8">
-          <BlockRenderer block={block} />
-        </div>
+        <BlockRenderer block={block} />
       </div>
     </div>
   );
@@ -102,7 +100,7 @@ const CanvasMode = ({ isPaletteItemActive }: CanvasModeProps) => {
           }`}
         >
           {blocks.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-gray-400">
+            <div className="flex flex-col items-center justify-center min-h-full text-gray-400">
               <p>Drag and drop building blocks here</p>
               <p className="mt-2 text-sm">or click on a block in the palette</p>
             </div>
