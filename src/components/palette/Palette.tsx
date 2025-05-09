@@ -134,7 +134,7 @@ export default function Palette({ buildingBlocks }: PaletteProps) {
           <div className="mb-4">
             <input
               type="text"
-              placeholder="Search blocks..."
+              placeholder="Search templates..."
               className="w-full px-3 py-2 text-black bg-white border border-white rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
               value={templatesearchTerm}
               onChange={(e) => setTemplateSearchTerm(e.target.value)}
