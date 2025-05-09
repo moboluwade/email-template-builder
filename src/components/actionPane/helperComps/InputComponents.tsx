@@ -1,7 +1,7 @@
 import { X } from "lucide-react";
 
 // Input Components
- interface TextInputProps {
+interface TextInputProps {
   label: string;
   value: string;
   onChange: (value: string) => void;
@@ -55,7 +55,7 @@ function SelectInput({ label, value, options, onChange }: SelectInputProps) {
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-3 py-2 text-white bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+        className="w-36 px-3 py-2 text-white bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>
@@ -199,7 +199,7 @@ function ListItemsInput({ items, onChange }: ListItemsInputProps) {
               type="text"
               value={item}
               onChange={(e) => updateItem(index, e.target.value)}
-              className="flex-1 px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-1 focus:ring-primary text-white"
+              className="flex-1 w-20 px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-1 focus:ring-primary text-white"
             />
             <button
               onClick={() => removeItem(index)}

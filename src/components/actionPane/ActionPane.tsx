@@ -4,6 +4,7 @@ import { Trash2 } from "lucide-react";
 import StyleSection from "./sections/StyleSection";
 import ContentSection from "./sections/ContentSection";
 import LayoutSection from "./sections/LayoutSection";
+import { useEffect } from "react";
 
 export default function ActionPane() {
   const { selectedBlockId, blocks, handleDelete } = useTemplateStore();
@@ -12,7 +13,7 @@ export default function ActionPane() {
 
   if (!selectedBlock) {
     return (
-      <div className="w-64 bg-[#0f0f14] border-l border-gray-800 h-screen p-4 flex-shrink-0 text-white">
+      <div className="bg-[#0f0f14] border-l border-gray-800 h-screen p-4 min-w-60 w-60 flex-shrink-0 text-white">
         <h2 className="mb-4 text-xl font-semibold text-center">Properties</h2>
         <div className="flex flex-col items-center justify-center h-[80%] text-gray-400">
           <p className="text-center">Select a block to edit its properties</p>
@@ -25,7 +26,7 @@ export default function ActionPane() {
     selectedBlock.type.charAt(0).toUpperCase() + selectedBlock.type.slice(1);
 
   return (
-    <div className="bg-[#0f0f14] border-l border-gray-800 h-screen overflow-y-auto p-4 w-60 text-white">
+    <div className="bg-[#0f0f14] border-l border-gray-800 h-screen overflow-y-auto p-4 min-w-60 w-60 flex-shrink-0 text-white">
       <div className="sticky top-0 flex justify-between pb-6 bg-[#0f0f14] w-48 z-10">
         
         {/* Header Section */}
