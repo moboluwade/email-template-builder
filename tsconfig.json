@@ -8,7 +8,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["vite/client"], // Vite-specific type support
+    "types": ["vite/client", "jest"], // Vite-specific type support
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
