@@ -16,3 +16,16 @@ If you are developing a production application, we recommend using TypeScript wi
 
 - [x] Scaffold tailwindCSS, Typescript to app.
 - [x] Scaffold storybook to proj.
+
+# colors
+
+- black bg - #06041f
+
+- CHOSE REACT SYNTAX HIGHLIGHTER FOR COLOR CODED HTML.
+
+- RELOAD THE HTML ON EVERY INTERACTION WITH THE ACTION PANE. SO IT IS KEPT TO ORDER.
+
+
+
+new
+add copy button to copy html

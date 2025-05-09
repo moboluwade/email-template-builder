@@ -8,6 +8,7 @@ export default {
         primary: {
           DEFAULT: "#645FCF",
           text: "#06060d",
+          chose: "#0f0f14"
         },
         secondary: "#cca6d8",
         accent: "#c27ec7",
