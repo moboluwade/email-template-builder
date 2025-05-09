@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import { nanoid } from "nanoid";
 import { serializeStyles } from "@/lib/serializeStyles";
 
@@ -32,6 +33,7 @@ interface TemplateState {
     styles: Record<string, any>
   ) => void;
   removeBlock: (id: string) => void;
+  clearBlocks: () => void;
 
   // helper func for action pane:
   handleChange: (key: string, value: any) => void;
@@ -42,7 +44,16 @@ interface TemplateState {
   selectBlock: (id: string | null) => void;
   setMode: (mode: "canvas" | "preview" | "html") => void;
   getHtmlOutput: () => string;
+
+  //template related functions
+  loadTemplate: (blocks: Omit<Block, "id" | "position">[]) => void;
+  clearTemplate: () => void;
 }
+
+type PartialTemplateState = Pick<
+  TemplateState,
+  "blocks" | "selectedBlockId" | "mode"
+>;
 
 // Content-only data (non-styling)
 const getDefaultContent = (type: BlockType): Record<string, any> => {
@@ -105,240 +116,287 @@ const getDefaultStyles = (type: BlockType): Record<string, any> => {
   }
 };
 
-export const useTemplateStore = create<TemplateState>((set, get) => ({
-  blocks: [],
-  selectedBlockId: null,
-  mode: "canvas",
+export const useTemplateStore = create(
+  persist<TemplateState>(
+    (set, get) => ({
+      blocks: [],
+      selectedBlockId: null,
+      mode: "canvas",
 
-  // Adds a new block with content and styles
-  addBlock: (type, position) =>
-    set((state) => {
-      const newBlock: Block = {
-        id: nanoid(),
-        type,
-        content: getDefaultContent(type),
-        styles: getDefaultStyles(type),
-        position: position !== undefined ? position : state.blocks.length,
-      };
+      // Adds a new block with content and styles
+      addBlock: (type, position) =>
+        set((state) => {
+          const newBlock: Block = {
+            id: nanoid(),
+            type,
+            content: getDefaultContent(type),
+            styles: getDefaultStyles(type),
+            position: position !== undefined ? position : state.blocks.length,
+          };
 
-      const newBlocks = [...state.blocks];
-      newBlocks.splice(newBlock.position, 0, newBlock);
+          const newBlocks = [...state.blocks];
+          newBlocks.splice(newBlock.position, 0, newBlock);
 
-      const updatedBlocks = newBlocks.map((block, index) => ({
-        ...block,
-        position: index,
-      }));
+          const updatedBlocks = newBlocks.map((block, index) => ({
+            ...block,
+            position: index,
+          }));
 
-      return {
-        blocks: updatedBlocks,
-        selectedBlockId: newBlock.id,
-      };
-    }),
+          return {
+            blocks: updatedBlocks,
+            selectedBlockId: newBlock.id,
+          };
+        }),
 
-  // Updates content or styles of a block
-  updateBlock: (
-    id,
-    content: Record<string, any>,
-    styles?: Record<string, any>
-  ) => {
-    set((state) => {
-      const updatedBlocks = state.blocks.map((block) =>
-        block.id === id
-          ? {
-              ...block,
-              content: { ...block.content, ...content },
-              styles: { ...block.styles, ...styles },
+      // Updates content or styles of a block
+      updateBlock: (
+        id,
+        content: Record<string, any>,
+        styles?: Record<string, any>
+      ) => {
+        set((state) => {
+          const updatedBlocks = state.blocks.map((block) =>
+            block.id === id
+              ? {
+                  ...block,
+                  content: { ...block.content, ...content },
+                  styles: { ...block.styles, ...styles },
+                }
+              : block
+          );
+
+          return { blocks: updatedBlocks };
+        });
+      },
+
+      // Removes a block
+      removeBlock: (id) =>
+        set((state) => {
+          const newBlocks = state.blocks.filter((block) => block.id !== id);
+          const updatedBlocks = newBlocks.map((block, index) => ({
+            ...block,
+            position: index,
+          }));
+
+          return {
+            blocks: updatedBlocks,
+            selectedBlockId: null,
+          };
+        }),
+
+      clearBlocks: () => {
+        set({
+          blocks: [],
+          selectedBlockId: null,
+        });
+      },
+
+      // Convenience helpers (handleChange, handleStyleChange, handleDelete)
+      handleChange: (key: string, value: any) => {
+        const { selectedBlockId, updateBlock } = get();
+        if (selectedBlockId) updateBlock(selectedBlockId, { [key]: value }, {});
+      },
+
+      handleStyleChange: (key: string, value: any) => {
+        const { selectedBlockId, updateBlock } = get();
+        if (selectedBlockId) updateBlock(selectedBlockId, {}, { [key]: value });
+      },
+
+      handleDelete: () => {
+        const { selectedBlockId, removeBlock } = get();
+        if (selectedBlockId) removeBlock(selectedBlockId);
+      },
+
+      // Moves block to a new position
+      moveBlock: (id, newPosition) =>
+        set((state) => {
+          const blockIndex = state.blocks.findIndex((block) => block.id === id);
+          if (blockIndex === -1) return state;
+
+          const newBlocks = [...state.blocks];
+          const [movedBlock] = newBlocks.splice(blockIndex, 1);
+          newBlocks.splice(newPosition, 0, movedBlock);
+
+          const updatedBlocks = newBlocks.map((block, index) => ({
+            ...block,
+            position: index,
+          }));
+
+          return {
+            blocks: updatedBlocks,
+            selectedBlockId: id,
+          };
+        }),
+
+      selectBlock: (id) => set({ selectedBlockId: id }),
+
+      setMode: (mode) => set({ mode }),
+
+      // template functions
+      loadTemplate: (templateBlocks) =>
+        set(() => {
+          // Convert template blocks to actual blocks with IDs and positions
+          const blocks = templateBlocks.map((block, index) => ({
+            ...block,
+            id: nanoid(),
+            position: index,
+          }));
+
+          // console.log(templateBlocks)
+          return {
+            blocks,
+            selectedBlockId: null,
+          };
+        }),
+
+      clearTemplate: () =>
+        set({
+          blocks: [],
+          selectedBlockId: null,
+        }),
+
+      // Converts blocks into full HTML output
+      getHtmlOutput: () => {
+        const { blocks } = get();
+
+        const htmlParts = blocks.map((block) => {
+          const style = serializeStyles(block.styles);
+          switch (block.type) {
+            case "header":
+              return `<h${
+                block.content.level
+              } style="margin: 0 0 16px 0; font-size: ${
+                block.styles.fontSize || "20px"
+              }; font-weight: bold; line-height: 1.4; ${style}">
+        ${block.content.text}
+      </h${block.content.level}>`;
+
+            case "paragraph":
+              return `<p style="margin: 0 0 16px 0; font-size: 16px; line-height: 1.5; ${style}">
+        ${block.content.text}
+      </p>`;
+
+            case "button":
+              return `
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin: 16px 0; padding: 0.25rem 2rem">
+        <tr>
+          <td bgcolor="${block.styles.backgroundColor}" style="border-radius: 4px;">
+            <a href="${block.content.url}" style="display: inline-block; padding: 12px 24px; font-size: 16px; color: ${block.styles.color}; text-decoration: none; font-weight: bold; ${style}">
+              ${block.content.text}
+            </a>
+          </td>
+        </tr>
+      </table>`;
+
+            case "image":
+              console.log(block);
+              return `
+      <div style="
+      text-align: ${
+        block.styles.textAlign || "center"
+      }; // <-- Alignment control
+      margin: 16px 0;
+      padding: 0.25rem 2rem; // <-- Added padding!
+      width: 100%; // <-- Takes full width
+    ">
+      <img
+        src="${block.content.src}"
+        alt="${block.content.alt || ""}"
+        style="
+          display: inline-block; // <-- Ensures it responds to text-align
+          width: ${block.styles.width || "auto"}; // <-- Image width
+          max-width: 100%; // <-- Prevents overflow
+          height: auto;
+        "
+      />
+      </div>`;
+
+            case "divider":
+              return `
+      <table role="presentation" width="100%" style="margin: 16px 0;">
+        <tr>
+          <td style="border-bottom: 1px solid #ccc; height: 1px; line-height: 1px;">&nbsp;</td>
+        </tr>
+      </table>`;
+
+            case "spacer":
+              return `<div style="height: ${
+                block.styles.height || "24px"
+              }; line-height: 1px; font-size: 1px;">&nbsp;</div>`;
+
+            case "table": {
+              const rows = block.content.data
+                .map(
+                  (row: string[]) =>
+                    `<tr>${row
+                      .map(
+                        (cell: string) =>
+                          `<td style="padding: 8px; border: 1px solid #ccc; text-align: left; word-break: break-word;">${cell}</td>`
+                      )
+                      .join("")}</tr>`
+                )
+                .join("");
+
+              const columnCount = block.content.data[0]?.length || 1;
+              const colGroup = Array.from({ length: columnCount })
+                .map(() => `<col style="width: ${100 / columnCount}%;" />`)
+                .join("");
+
+              // div wrapper to add padding to the table, (table element disables padding)
+              return ` <div style="padding: 4px 32px;">
+            <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse; width: 100%; ${style}">
+        <colgroup>${colGroup}</colgroup>
+        <tbody>
+          ${rows}
+        </tbody>
+      </table>
+    </div>`;
             }
-          : block
-      );
 
-      return { blocks: updatedBlocks };
-    });
-  },
+            default:
+              return "";
+          }
+        });
 
-  // Removes a block
-  removeBlock: (id) =>
-    set((state) => {
-      const newBlocks = state.blocks.filter((block) => block.id !== id);
-      const updatedBlocks = newBlocks.map((block, index) => ({
-        ...block,
-        position: index,
-      }));
-
-      return {
-        blocks: updatedBlocks,
-        selectedBlockId: null,
-      };
-    }),
-
-    
-  // Convenience helpers (handleChange, handleStyleChange, handleDelete)
-  handleChange: (key: string, value:any) => {
-    const { selectedBlockId, updateBlock } = get();
-    if (selectedBlockId)
-      updateBlock(selectedBlockId, { [key]: value }, {});
-  },
-
-  handleStyleChange: (key: string, value: any) => {
-    const { selectedBlockId, updateBlock } = get();
-    if (selectedBlockId)
-      updateBlock(selectedBlockId, {}, { [key]: value });
-  },
-
-  handleDelete: () => {
-    const { selectedBlockId, removeBlock } = get();
-    if (selectedBlockId)
-      removeBlock(selectedBlockId);
-  },
-
-  // Moves block to a new position
-  moveBlock: (id, newPosition) =>
-    set((state) => {
-      const blockIndex = state.blocks.findIndex((block) => block.id === id);
-      if (blockIndex === -1) return state;
-
-      const newBlocks = [...state.blocks];
-      const [movedBlock] = newBlocks.splice(blockIndex, 1);
-      newBlocks.splice(newPosition, 0, movedBlock);
-
-      const updatedBlocks = newBlocks.map((block, index) => ({
-        ...block,
-        position: index,
-      }));
-
-      return {
-        blocks: updatedBlocks,
-        selectedBlockId: id,
-      };
-    }),
-
-  selectBlock: (id) => set({ selectedBlockId: id }),
-
-  setMode: (mode) => set({ mode }),
-
-  // Converts blocks into full HTML output
-  getHtmlOutput: () => {
-    const { blocks } = get();
-
-    const htmlParts = blocks.map((block) => {
-      const style = serializeStyles(block.styles);
-      switch (block.type) {
-        case "header":
-          return `<h${
-            block.content.level
-          } style="margin: 0 0 16px 0; font-size: ${
-            block.styles.fontSize || "20px"
-          }; font-weight: bold; line-height: 1.4; ${style}">
-      ${block.content.text}
-    </h${block.content.level}>`;
-
-        case "paragraph":
-          return `<p style="margin: 0 0 16px 0; font-size: 16px; line-height: 1.5; ${style}">
-      ${block.content.text}
-    </p>`;
-
-        case "button":
-          return `
-    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin: 16px 0; padding: 0.25rem 2rem">
+        return `<!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Template</title>
+  </head>
+  <body style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
+    <table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto;">
       <tr>
-        <td bgcolor="${
-          block.styles.backgroundColor
-        }" style="border-radius: 4px;">
-          <a href="${
-            block.content.url
-          }" style="display: inline-block; padding: 12px 24px; font-size: 16px; color: ${
-            block.styles.color
-          }; text-decoration: none; font-weight: bold; ${style}">
-            ${block.content.text}
-          </a>
+        <td>
+          ${htmlParts.join("\n        ")}
         </td>
       </tr>
-    </table>`;
-
-        case "image":
-          console.log(block);
-          return `
-    <div style="
-    text-align: ${block.styles.textAlign || "center"}; // <-- Alignment control
-    margin: 16px 0;
-    padding: 0.25rem 2rem; // <-- Added padding!
-    width: 100%; // <-- Takes full width
-  ">
-    <img
-      src="${block.content.src}"
-      alt="${block.content.alt || ""}"
-      style="
-        display: inline-block; // <-- Ensures it responds to text-align
-        width: ${block.styles.width || "auto"}; // <-- Image width
-        max-width: 100%; // <-- Prevents overflow
-        height: auto;
-      "
-    />
-    </div>`;
-
-        case "divider":
-          return `
-    <table role="presentation" width="100%" style="margin: 16px 0;">
-      <tr>
-        <td style="border-bottom: 1px solid #ccc; height: 1px; line-height: 1px;">&nbsp;</td>
-      </tr>
-    </table>`;
-
-        case "spacer":
-          return `<div style="height: ${
-            block.styles.height || "24px"
-          }; line-height: 1px; font-size: 1px;">&nbsp;</div>`;
-
-        case "table": {
-          const rows = block.content.data
-            .map(
-              (row: string[]) =>
-                `<tr>${row
-                  .map(
-                    (cell: string) =>
-                      `<td style="padding: 8px; border: 1px solid #ccc; text-align: left; word-break: break-word;">${cell}</td>`
-                  )
-                  .join("")}</tr>`
-            )
-            .join("");
-
-          const columnCount = block.content.data[0]?.length || 1;
-          const colGroup = Array.from({ length: columnCount })
-            .map(() => `<col style="width: ${100 / columnCount}%;" />`)
-            .join("");
-
-          // div wrapper to add padding to the table, (table element disables padding)
-          return ` <div style="padding: 4px 32px;">
-          <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse; width: 100%; ${style}">
-      <colgroup>${colGroup}</colgroup>
-      <tbody>
-        ${rows}
-      </tbody>
     </table>
-  </div>`;
-        }
-
-        default:
-          return "";
-      }
-    });
-
-    return `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Email Template</title>
-</head>
-<body style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
-  <table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto;">
-    <tr>
-      <td>
-        ${htmlParts.join("\n        ")}
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`;
-  },
-}));
+  </body>
+  </html>`;
+      },
+    }),
+    {
+      name: "email-template", // Key for localStorage
+      partialize: (state) => ({
+        blocks: state.blocks ?? [],
+        selectedBlockId: state.selectedBlockId ?? "0",
+        mode: state.mode ?? "canvas",
+        addBlock: state.addBlock ?? (() => {}),
+        updateBlock: state.updateBlock ?? (() => {}),
+        removeBlock: state.removeBlock ?? (() => {}),
+        clearBlocks: state.clearBlocks ?? (() => {}),
+        handleChange: state.handleChange ?? (() => {}),
+        handleStyleChange: state.handleStyleChange ?? (() => {}),
+        handleDelete: state.handleDelete ?? (() => {}),
+        moveBlock: state.moveBlock ?? (() => {}),
+        selectBlock: state.selectBlock ?? (() => {}),
+        setMode: state.setMode ?? (() => {}),
+        loadTemplate: state.loadTemplate ?? (() => {}),
+        clearTemplate: state.clearTemplate ?? (() => {}),
+        getHtmlOutput: state.getHtmlOutput ?? (() => ""),
+      }),
+    }
+  )
+);
