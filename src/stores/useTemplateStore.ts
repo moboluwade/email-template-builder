@@ -32,6 +32,12 @@ interface TemplateState {
     styles: Record<string, any>
   ) => void;
   removeBlock: (id: string) => void;
+
+  // helper func for action pane:
+  handleChange: (key: string, value: any) => void;
+  handleStyleChange: (key: string, value: any) => void;
+  handleDelete: () => void;
+
   moveBlock: (id: string, newPosition: number) => void;
   selectBlock: (id: string | null) => void;
   setMode: (mode: "canvas" | "preview" | "html") => void;
@@ -130,7 +136,11 @@ export const useTemplateStore = create<TemplateState>((set, get) => ({
     }),
 
   // Updates content or styles of a block
-  updateBlock: (id, content, styles) => {
+  updateBlock: (
+    id,
+    content: Record<string, any>,
+    styles?: Record<string, any>
+  ) => {
     set((state) => {
       const updatedBlocks = state.blocks.map((block) =>
         block.id === id
@@ -160,6 +170,26 @@ export const useTemplateStore = create<TemplateState>((set, get) => ({
         selectedBlockId: null,
       };
     }),
+
+    
+  // Convenience helpers (handleChange, handleStyleChange, handleDelete)
+  handleChange: (key: string, value:any) => {
+    const { selectedBlockId, updateBlock } = get();
+    if (selectedBlockId)
+      updateBlock(selectedBlockId, { [key]: value }, {});
+  },
+
+  handleStyleChange: (key: string, value: any) => {
+    const { selectedBlockId, updateBlock } = get();
+    if (selectedBlockId)
+      updateBlock(selectedBlockId, {}, { [key]: value });
+  },
+
+  handleDelete: () => {
+    const { selectedBlockId, removeBlock } = get();
+    if (selectedBlockId)
+      removeBlock(selectedBlockId);
+  },
 
   // Moves block to a new position
   moveBlock: (id, newPosition) =>
@@ -194,17 +224,71 @@ export const useTemplateStore = create<TemplateState>((set, get) => ({
       const style = serializeStyles(block.styles);
       switch (block.type) {
         case "header":
-          return `<${block.content.level} style="${style}">${block.content.text}</${block.content.level}>`;
+          return `<h${
+            block.content.level
+          } style="margin: 0 0 16px 0; font-size: ${
+            block.styles.fontSize || "20px"
+          }; font-weight: bold; line-height: 1.4; ${style}">
+      ${block.content.text}
+    </h${block.content.level}>`;
+
         case "paragraph":
-          return `<p style="${style}">${block.content.text}</p>`;
+          return `<p style="margin: 0 0 16px 0; font-size: 16px; line-height: 1.5; ${style}">
+      ${block.content.text}
+    </p>`;
+
         case "button":
-          return `<div ><a href="${block.content.url}" style="${style}">${block.content.text}</a></div>`;
+          return `
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin: 16px 0; padding: 0.25rem 2rem">
+      <tr>
+        <td bgcolor="${
+          block.styles.backgroundColor
+        }" style="border-radius: 4px;">
+          <a href="${
+            block.content.url
+          }" style="display: inline-block; padding: 12px 24px; font-size: 16px; color: ${
+            block.styles.color
+          }; text-decoration: none; font-weight: bold; ${style}">
+            ${block.content.text}
+          </a>
+        </td>
+      </tr>
+    </table>`;
+
         case "image":
-          return `<div style="text-align: ${block.styles.textAlign};"><img src="${block.content.src}" alt="${block.content.alt}" style="width: ${block.styles.width};" /></div>`;
+          console.log(block);
+          return `
+    <div style="
+    text-align: ${block.styles.textAlign || "center"}; // <-- Alignment control
+    margin: 16px 0;
+    padding: 0.25rem 2rem; // <-- Added padding!
+    width: 100%; // <-- Takes full width
+  ">
+    <img
+      src="${block.content.src}"
+      alt="${block.content.alt || ""}"
+      style="
+        display: inline-block; // <-- Ensures it responds to text-align
+        width: ${block.styles.width || "auto"}; // <-- Image width
+        max-width: 100%; // <-- Prevents overflow
+        height: auto;
+      "
+    />
+    </div>`;
+
         case "divider":
-          return `<hr style="${style}" />`;
+          return `
+    <table role="presentation" width="100%" style="margin: 16px 0;">
+      <tr>
+        <td style="border-bottom: 1px solid #ccc; height: 1px; line-height: 1px;">&nbsp;</td>
+      </tr>
+    </table>`;
+
         case "spacer":
-          return `<div style="${style}"></div>`;
+          return `<div style="height: ${
+            block.styles.height || "24px"
+          }; line-height: 1px; font-size: 1px;">&nbsp;</div>`;
+
         case "table": {
           const rows = block.content.data
             .map(
@@ -223,12 +307,15 @@ export const useTemplateStore = create<TemplateState>((set, get) => ({
             .map(() => `<col style="width: ${100 / columnCount}%;" />`)
             .join("");
 
-          return `<table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse; width: 100%; ${style}">
-    <colgroup>${colGroup}</colgroup>
-    <tbody>
-      ${rows}
-    </tbody>
-  </table>`;
+          // div wrapper to add padding to the table, (table element disables padding)
+          return ` <div style="padding: 4px 32px;">
+          <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse; width: 100%; ${style}">
+      <colgroup>${colGroup}</colgroup>
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+  </div>`;
         }
 
         default:

@@ -79,7 +79,7 @@ export function BlockRenderer({ block }: BlockRendererProps) {
 
     case "paragraph":
       return (
-        // ✅ Wrap in a div to apply block.styles
+        //  Wrap in a div to apply block.styles
         <div style={block.styles}>
           <p
             style={{
@@ -94,7 +94,7 @@ export function BlockRenderer({ block }: BlockRendererProps) {
 
     case "button":
       return (
-        // ✅ Apply block.styles to outer wrapper and preserve alignment
+        //  Apply block.styles to outer wrapper and preserve alignment
         <div
           style={{
             // ...block.styles,
@@ -111,21 +111,36 @@ export function BlockRenderer({ block }: BlockRendererProps) {
 
     case "image":
       return (
-        // ✅ Apply block.styles to outer wrapper and preserve alignment
-        <div style={{ ...block.styles, textAlign: block.content.align as any }}>
+        //  Apply block.styles to outer wrapper and preserve alignment
+        // Structure for ONE block (assuming this is repeated)
+        <div
+          style={{
+            ...block.styles,
+            width: "100%", // Outer container takes full width
+            textAlign: block.content.align as any, // Outer container handles text/inline-block alignment
+          }}
+        >
           {block.content.src ? (
             <img
               src={block.content.src || "/placeholder.svg"}
               alt={block.content.alt}
-              style={{ width: block.content.width }}
-              className="max-w-full"
+              style={{
+                width: block.styles.width, // Image width controlled by block.styles
+                display: "inline-block", // Ensure image behaves like inline-block for textAlign
+              }}
+              className="max-w-full" // Responsive safeguard
             />
           ) : (
+            // Placeholder: Always 100% width, text centered via flex
             <div
               className="flex items-center justify-center bg-gray-200"
-              style={{ width: "100%", height: "150px" }}
+              style={{
+                width: block.styles.width, // Image width controlled by block.styles
+                height: "150px",
+                display: "inline-block", // Ensure image behaves like inline-block for textAlign
+              }}
             >
-              <span className="text-gray-500">Image Placeholder</span>
+              <span className="text-gray-500 ">Image Placeholder</span>
             </div>
           )}
         </div>
@@ -133,7 +148,7 @@ export function BlockRenderer({ block }: BlockRendererProps) {
 
     case "divider":
       return (
-        // ✅ Apply block.styles if needed (optional here)
+        //  Apply block.styles if needed (optional here)
         <div style={block.styles}>
           <hr
             style={{
@@ -146,7 +161,7 @@ export function BlockRenderer({ block }: BlockRendererProps) {
 
     case "spacer":
       return (
-        // ✅ Apply block.styles to allow custom padding/margin etc.
+        //  Apply block.styles to allow custom padding/margin etc.
         <div
           style={{ height: `${block.content.height}px`, ...block.styles }}
         ></div>
@@ -157,7 +172,7 @@ export function BlockRenderer({ block }: BlockRendererProps) {
       const listClass =
         block.content.type === "ordered" ? "list-decimal" : "list-disc";
       return (
-        // ✅ Wrap list in a div for block.styles
+        // Wrap list in a div for block.styles
         <div style={block.styles}>
           <ListTag className={`pl-5 ${listClass}`}>
             {block.content.items.map((item: string, index: number) => (
@@ -169,48 +184,31 @@ export function BlockRenderer({ block }: BlockRendererProps) {
 
     case "table":
       return (
-        <table
-          width="100%"
-          cellPadding={0}
-          cellSpacing={0}
-          border={0}
-          style={{
-            borderCollapse: "collapse",
-            width: "100%",
-            tableLayout: "fixed", // forces the table to distribute width evenly first then expand.
-            ...block.styles, // allows padding, margin etc.
-          }}
-        >
-          <tbody>
-            {block.content.data.map((row: string[], rowIndex: number) => (
-              <tr key={rowIndex}>
-                {row.map((cell: string, cellIndex: number) => (
-                  <td
-                    key={cellIndex}
-                    style={{
-                      padding: "8px",
-                      border: "1px solid #ccc",
-                      textAlign: "left",
-                    }}
-                  >
-                    {cell}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      );
-
-      return (
-        // ✅ Wrap table in a div for block.styles
-        <div style={block.styles}>
-          <table className="w-full border-collapse">
+        <div style={{ padding: "0.25rem 2rem" }}>
+          <table
+            width="100%"
+            cellPadding={0}
+            cellSpacing={0}
+            border={0}
+            style={{
+              borderCollapse: "collapse",
+              width: "100%",
+              tableLayout: "fixed", // forces the table to distribute width evenly first then expand.
+              ...block.styles, // allows padding, margin etc.
+            }}
+          >
             <tbody>
               {block.content.data.map((row: string[], rowIndex: number) => (
                 <tr key={rowIndex}>
                   {row.map((cell: string, cellIndex: number) => (
-                    <td key={cellIndex} className="p-2 border border-gray-300">
+                    <td
+                      key={cellIndex}
+                      style={{
+                        padding: "8px",
+                        border: "1px solid #ccc",
+                        textAlign: "left",
+                      }}
+                    >
                       {cell}
                     </td>
                   ))}

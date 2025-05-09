@@ -1,16 +1,11 @@
-import React from "react";
 import { BlockRenderer } from "../../BlockRenderer";
 import { useTemplateStore } from "@/stores/useTemplateStore";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
-  closestCenter,
-  DndContext,
-  DragEndEvent,
   useDroppable,
 } from "@dnd-kit/core";
 import { GripVertical } from "lucide-react";
-import { BuildingBlock } from "@/lib/buildingBlocks";
 
 // for sortable block component
 function SortableBlock({
