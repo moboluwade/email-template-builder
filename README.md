@@ -31,54 +31,67 @@ Plug it into your Next.js or React app, customize blocks, and skip the headache 
 -   🧾 **Form Builder Mode** – Leverage pre-built transactional email templates for faster setup of common use cases like password resets or notifications.
     
 
-----------
+---
 
-## 🧱 Add Custom Blocks (Advanced)
+## 📘 Instructions
 
--   Extend the block palette configuration.
+-   📚 The **Palette Sidenav** contains reusable **blocks** (e.g., headers, buttons, images) and **pre-built templates** to get started quickly.
     
--   Define your own rendering logic and HTML output.
+-   🖱️ **Drag and drop** blocks from the palette into the canvas to build your email layout — or click a template to load a full structure instantly.
     
--   Register custom block types using the upcoming `registerBlockType` utility.
+-   ✉️ To add support for a new email provider, create a custom configuration inside the `./src/email/providers/` folder.
     
 
 ----------
 
 ## ⚙️ Design & Architecture Notes
 
--   ❌ No nested `DnDContext` – minimizes complexity and keeps drag logic clean.
+-   🧠 **State Management** – Powered by Zustand for a lightweight, predictable state layer.
     
--   🧠 Centralized `handleDragEnd` handler – consistent and easy to manage.
+    -   Includes `zustand-persist` to auto-save progress via localStorage, ensuring state persists across reloads.
+        
+-   🎨 **Styling** – Uses scoped **CSS Modules** and semantic HTML to ensure email-safe, responsive output across clients.
     
--   🎨 CSS Modules used instead of Tailwind – reduces final bundle size.
+-   🧩 **Modular Architecture** – Components are structured for high separation of concerns and scalability.
     
--   🧪 Zustand for state management – lightweight and predictable global store.
+-   🧱 **Template Store** – Centralized logic lives in the isolated `useTemplateStore`, which handles both app-level and HTML generation state.
     
-
-----------
+-   🧲 **Drag-and-Drop Engine** – Built with React DnD (not native HTML5 DnD) for better accessibility and full **mobile support**.
+    
+-   🧪 **Maintainable Codebase** – Clean, composable utilities and adapters enable future expansion with minimal friction.
+  
 
 ## 🧩 Limitations
 
--   🚫 Not yet published as an installable NPM package (but built to support that architecture).
-    
--   🎨 Limited style customization per block — currently prioritizing structure over visual theming.
-    
+  
+
+- 🚫 Not yet published as an installable NPM package (but built to support that architecture).
+
+- 🎨 Limited style customization per block — currently prioritizing structure over visual theming.
+
+  
 
 ----------
 
 ## ⚖️ Design Tradeoffs
 
--   ⚙️ Focused heavily on extensible drag-and-drop mechanics.
-    
--   🖋️ Canvas content is edited through an external action pane rather than direct inline text editing.
-    
+
+- ⚙️ Focused heavily on extensible drag-and-drop mechanics.
+
+- 🖋️ Canvas content is edited through an external action pane rather than direct inline text editing.
+
+  
 
 ----------
 
+  
+
 ## 🌅 Future Roadmap
 
--   📝 **Inline Editing on Canvas** – Make blocks fully interactive so users can edit content directly on the canvas.
-    
--   📦 **Plugin Packaging** – Bundle and publish as a fully-configured plugin ready for integration into React or Next.js apps.
-    
--   🎨 **Style Customization** – Expand support for fine-grained, per-block custom styling (e.g., color pickers, spacing controls).
+  
+
+- 📝 **Inline Editing on Canvas** – Make blocks fully interactive so users can edit content directly on the canvas.
+
+- 📦 **Plugin Packaging** – Bundle and publish as a fully-configured plugin ready for integration into React or Next.js apps.
+
+- 🎨 **Style Customization** – Expand support for fine-grained, per-block custom styling (e.g., color pickers, spacing controls).
