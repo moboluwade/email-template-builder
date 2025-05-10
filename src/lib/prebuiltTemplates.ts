@@ -31,12 +31,11 @@ const transactionalReceipt: EmailTemplate = {
     createTemplateBlock(
       "image",
       {
-        src: "https://via.placeholder.com/200x60?text=YourLogo",
+        src: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%3Fid%3DOIP.iuSUqpdVGeiaB0Lyck0ghwHaCO%26pid%3DApi&f=1&ipt=21e9c927199b72482717f9b7528a03c1dae95038284777191d4ade44b1df68b1&ipo=images",
         alt: "Company Logo",
-        width: "200px",
         align: "center",
       },
-      { marginBottom: "20px" }
+      { width: "100%", marginBottom: "20px" }
     ),
 
     // Receipt header
@@ -441,7 +440,7 @@ const marketingNewsletter: EmailTemplate = {
     createTemplateBlock(
       "image",
       {
-        src: "https://via.placeholder.com/600x150?text=Newsletter+Banner",
+        src: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%3Fid%3DOIP.iuSUqpdVGeiaB0Lyck0ghwHaCO%26pid%3DApi&f=1&ipt=21e9c927199b72482717f9b7528a03c1dae95038284777191d4ade44b1df68b1&ipo=images",
         alt: "Newsletter Banner",
         width: "100%",
         align: "center",

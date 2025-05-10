@@ -1,9 +1,10 @@
 "use client";
 
 import { useTemplateStore } from "@/stores/useTemplateStore";
-import { Code, Edit2, Eye } from "lucide-react";
+import { Code, Edit2, Eye, RefreshCcw } from "lucide-react";
 import ExportButton from "./ExportButton";
 import ConnectProviderButton from "./provider/ConnectProviderButton";
+import { Tooltip } from "./Tooltip";
 
 const Modes = [
   { label: "Canvas", icon: <Edit2 size={16} />, value: "canvas" },
@@ -12,7 +13,7 @@ const Modes = [
 ] as const;
 
 const Navigator = () => {
-  const { mode, setMode } = useTemplateStore();
+  const { mode, setMode, clearBlocks } = useTemplateStore();
 
   const handleModeChange = (newMode: "canvas" | "preview" | "html") => {
     setMode(newMode);
@@ -42,7 +43,15 @@ const Navigator = () => {
       </div>
 
       <div className="flex items-center space-x-3">
-        
+        <Tooltip content="Reset Form">
+          <button
+            onClick={clearBlocks}
+            className="p-2 text-white transition-colors bg-red-500 rounded-md hover:bg-opacity-90"
+          >
+            <RefreshCcw size={18} />
+          </button>
+        </Tooltip>
+
         <ExportButton />
         <ConnectProviderButton />
       </div>
