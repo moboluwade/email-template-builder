@@ -86,9 +86,9 @@ export default function ProviderConfigModal({ providerId, onClose }: ProviderCon
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+      <div className="w-full max-w-md bg-white rounded-lg shadow-xl">
         <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="text-xl font-semibold">Configure {provider.name}</h2>
+          <h2 className="text-xl font-semibold text-black">Configure {provider.name}</h2>
           <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100">
             <X size={20} />
           </button>
@@ -97,17 +97,17 @@ export default function ProviderConfigModal({ providerId, onClose }: ProviderCon
         <div className="p-4">
           <p className="mb-4 text-sm text-gray-600">{provider.description}</p>
 
-          <div className="space-y-4 mb-6">
+          <div className="mb-6 space-y-4">
             {configFields.map((field) => (
               <div key={field.name}>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block mb-1 text-sm font-medium text-gray-700">
                   {field.label} {field.required && <span className="text-red-500">*</span>}
                 </label>
                 {field.type === "select" ? (
                   <select
                     value={config[field.name] || ""}
                     onChange={(e) => handleConfigChange(field.name, e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                    className="w-full px-3 py-2 text-black border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
                   >
                     <option value="">Select...</option>
                     {field.options?.map((option: any) => (
@@ -121,7 +121,7 @@ export default function ProviderConfigModal({ providerId, onClose }: ProviderCon
                     type={field.type}
                     value={config[field.name] || ""}
                     onChange={(e) => handleConfigChange(field.name, e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                    className="w-full px-3 py-2 text-black border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
                     placeholder={`Enter ${field.label.toLowerCase()}`}
                   />
                 )}
